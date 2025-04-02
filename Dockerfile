@@ -17,6 +17,9 @@ RUN \
         pnpm config set registry https://registry.npmmirror.com ; \
     fi;
 
+    # 确保删除全局的 yarn 版本（如果安装）
+RUN npm uninstall -g yarn || true
+
 COPY ./tsconfig.json /app/
 COPY ./pnpm-lock.yaml /app/
 COPY ./package.json /app/
