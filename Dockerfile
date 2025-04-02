@@ -134,37 +134,26 @@ RUN \
     set -ex && \
     apt-get update && \
     apt-get install -yq --no-install-recommends \
-        dumb-init git curl \
-    ; \
-    if [ "$PUPPETEER_SKIP_DOWNLOAD" = 0 ]; then \
-        if [ "$TARGETPLATFORM" = 'linux/amd64' ]; then \
-            apt-get install -yq --no-install-recommends \
-                ca-certificates fonts-liberation wget xdg-utils \
-                libasound2 libatk-bridge2.0-0 libatk1.0-0 libatspi2.0-0 libcairo2 libcups2 libdbus-1-3 libdrm2 \
-                libexpat1 libgbm1 libglib2.0-0 libnspr4 libnss3 libpango-1.0-0 libx11-6 libxcb1 libxcomposite1 \
-                libxdamage1 libxext6 libxfixes3 libxkbcommon0 libxrandr2 \
-            ; \
-        else \
-            apt-get install -yq --no-install-recommends \
-                chromium \
-            && \
-            echo "CHROMIUM_EXECUTABLE_PATH=$(which chromium)" | tee /app/.env ; \
-        fi; \
-    fi; \
-    rm -rf /var/lib/apt/lists/*
+        dumb-init git curl chromium \
+        ca-certificates fonts-liberation wget xdg-utils \
+        libasound2 libatk-bridge2.0-0 libatk1.0-0 libatspi2.0-0 libcairo2 libcups2 libdbus-1-3 libdrm2 \
+        libexpat1 libgbm1 libglib2.0-0 libnspr4 libnss3 libpango-1.0-0 libx11-6 libxcb1 libxcomposite1 \
+        libxdamage1 libxext6 libxfixes3 libxkbcommon0 libxrandr2 \
+    && \
+    echo "CHROMIUM_EXECUTABLE_PATH=$(which chromium)" | tee /app/.env \
+    && rm -rf /var/lib/apt/lists/*
+
 
 COPY --from=chromium-downloader /app/node_modules/.cache/puppeteer /app/node_modules/.cache/puppeteer
 
 RUN \
     set -ex && \
-    if [ "$PUPPETEER_SKIP_DOWNLOAD" = 0 ] && [ "$TARGETPLATFORM" = 'linux/amd64' ]; then \
-        echo 'Verifying Chromium installation...' && \
-        if ldd $(find /app/node_modules/.cache/puppeteer/ -name chrome -type f) | grep "not found"; then \
-            echo "!!! Chromium has unmet shared libs !!!" && \
-            exit 1 ; \
-        else \
-            echo "Awesome! All shared libs are met!" ; \
-        fi; \
+    echo 'Verifying Chromium installation...' && \
+    if ldd $(which chromium) | grep "not found"; then \
+        echo "!!! Chromium has unmet shared libs !!!" && \
+        exit 1 ; \
+    else \
+        echo "Awesome! All shared libs are met!" ; \
     fi;
 
 COPY --from=docker-minifier /app /app
