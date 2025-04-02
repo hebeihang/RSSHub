@@ -8,8 +8,8 @@ WORKDIR /app
 ARG USE_CHINA_NPM_REGISTRY=0
 RUN \
     set -ex && \
-    npm install -g corepack@latest && \
-    corepack enable pnpm && \
+    corepack enable && \
+    corepack use pnpm@9.15.9 && \
     if [ "$USE_CHINA_NPM_REGISTRY" = 1 ]; then \
         echo 'use npm mirror' && \
         npm config set registry https://registry.npmmirror.com && \
@@ -49,6 +49,8 @@ RUN \
 FROM node:22-bookworm-slim AS docker-minifier
 # The stage is used to further reduce the image size by removing unused files.
 
+RUN corepack enable && corepack use pnpm@9.15.9
+
 WORKDIR /app
 # COPY --from=dep-version-parser /ver/* /minifier/
 
@@ -83,6 +85,7 @@ RUN \
 FROM node:22-bookworm-slim AS chromium-downloader
 # This stage is necessary to improve build concurrency and minimize the image size.
 # Yeah, downloading Chromium never needs those dependencies below.
+RUN corepack enable && corepack use pnpm@9.15.9
 
 WORKDIR /app
 COPY ./.puppeteerrc.cjs /app/
@@ -114,6 +117,9 @@ RUN \
 # ---------------------------------------------------------------------------------------------------------------------
 
 FROM node:22-bookworm-slim AS app
+
+RUN corepack enable && corepack use pnpm@9.15.9
+
 
 LABEL org.opencontainers.image.authors="https://github.com/DIYgod/RSSHub"
 
