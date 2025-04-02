@@ -107,7 +107,7 @@ RUN \
         echo 'Downloading Chromium...' && \
         unset PUPPETEER_SKIP_DOWNLOAD && \
         npm install -g corepack@latest && \
-        corepack use pnpm@latest-9 && \
+        corepack use pnpm@9.15.9 && \
         pnpm add puppeteer@$(cat /app/.puppeteer_version) --save-prod && \
         pnpm rb ; \
     else \
@@ -169,6 +169,7 @@ ENTRYPOINT ["dumb-init", "--"]
 
 CMD ["npm", "run", "start"]
 
+RUN pnpm --version
 # ---------------------------------------------------------------------------------------------------------------------
 
 # In case Chromium has unmet shared libs, here is some magic to find and install the packages they belong to:
